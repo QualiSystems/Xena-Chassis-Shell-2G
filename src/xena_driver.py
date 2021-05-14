@@ -1,11 +1,9 @@
-
 from cloudshell.traffic.tg import TrafficDriver
 
 from xena_handler import XenaHandler
 
 
 class XenaChassisDriver(TrafficDriver):
-
     def __init__(self):
         self.handler = XenaHandler()
 

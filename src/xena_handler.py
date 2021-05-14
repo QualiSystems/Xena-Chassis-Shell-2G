@@ -3,11 +3,10 @@ import logging
 from cloudshell.shell.core.driver_context import AutoLoadCommandContext, AutoLoadDetails, InitCommandContext
 from cloudshell.shell.core.session.cloudshell_session import CloudShellSessionContext
 from cloudshell.traffic.tg import TgChassisHandler
-
 from trafficgenerator.tgn_utils import ApiType
-from xenavalkyrie.xena_app import init_xena, XenaChassis, XenaModule, XenaPort
+from xenavalkyrie.xena_app import XenaChassis, XenaModule, XenaPort, init_xena
 
-from xena_data_model import XenaChassisShell2G, GenericTrafficGeneratorModule, GenericTrafficGeneratorPort
+from xena_data_model import GenericTrafficGeneratorModule, GenericTrafficGeneratorPort, XenaChassisShell2G
 
 
 class XenaHandler(TgChassisHandler):
@@ -16,8 +15,7 @@ class XenaHandler(TgChassisHandler):
         super().initialize(resource, logger)
 
     def load_inventory(self, context: AutoLoadCommandContext) -> AutoLoadDetails:
-        """Return device structure with all standard attributes."""
-
+        """Return device structure with all standard attributes. """
         address = context.resource.address
         port = self.resource.controller_tcp_port
         port = int(port) if port else 22611
@@ -41,8 +39,7 @@ class XenaHandler(TgChassisHandler):
             self._load_module(module_id, module)
 
     def _load_module(self, module_id: int, module: XenaModule) -> None:
-        """Get module resource and attributes."""
-
+        """Get module resource and attributes. """
         gen_module = GenericTrafficGeneratorModule(f"Module{module_id}")
         self.resource.add_sub_resource(f"M{module_id}", gen_module)
         gen_module.model_name = module.m_info["m_model"]
@@ -53,8 +50,7 @@ class XenaHandler(TgChassisHandler):
             self._load_port(gen_module, port_id, port)
 
     def _load_port(self, gen_module: GenericTrafficGeneratorModule, port_id: int, port: XenaPort) -> None:
-        """Get port resource and attributes."""
-
+        """Get port resource and attributes. """
         gen_port = GenericTrafficGeneratorPort(f"Port{port_id}")
         gen_module.add_sub_resource(f"P{port_id}", gen_port)
         gen_port.max_speed = int(port.p_info["p_speed"])
