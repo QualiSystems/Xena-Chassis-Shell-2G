@@ -1,91 +1,60 @@
+import logging
 
-from cloudshell.shell.core.driver_context import AutoLoadDetails, AutoLoadResource, AutoLoadAttribute
+from cloudshell.shell.core.driver_context import AutoLoadCommandContext, AutoLoadDetails, InitCommandContext
 from cloudshell.shell.core.session.cloudshell_session import CloudShellSessionContext
+from cloudshell.traffic.tg import TgChassisHandler
 
-from xenamanager.xena_app import init_xena
+from trafficgenerator.tgn_utils import ApiType
+from xenavalkyrie.xena_app import init_xena, XenaChassis, XenaModule, XenaPort
+
+from xena_data_model import XenaChassisShell2G, GenericTrafficGeneratorModule, GenericTrafficGeneratorPort
 
 
-class XenaHandler(object):
+class XenaHandler(TgChassisHandler):
+    def initialize(self, context: InitCommandContext, logger: logging.Logger) -> None:
+        resource = XenaChassisShell2G.create_from_context(context)
+        super().initialize(resource, logger)
 
-    def initialize(self, context, logger):
-        """
-        :type context: cloudshell.shell.core.driver_context.InitCommandContext
-        """
+    def load_inventory(self, context: AutoLoadCommandContext) -> AutoLoadDetails:
+        """Return device structure with all standard attributes."""
 
-        self.logger = logger
-        self.address = context.resource.address
-        port = context.resource.attributes['Xena Chassis Shell 2G.Controller TCP Port']
-        if not port:
-            port = '22611'
-        encripted_password = context.resource.attributes['Xena Chassis Shell 2G.Password']
-        password = CloudShellSessionContext(context).get_api().DecryptPassword(encripted_password).Value
+        address = context.resource.address
+        port = self.resource.controller_tcp_port
+        port = int(port) if port else 22611
+        encrypted_password = self.resource.password
+        password = CloudShellSessionContext(context).get_api().DecryptPassword(encrypted_password).Value
 
-        self.xm = init_xena(self.logger, 'quali-cs')
-        self.xm.session.add_chassis(self.address, int(port), password)
-
-    def get_inventory(self, context):
-        """ Return device structure with all standard attributes
-
-        :type context: cloudshell.shell.core.driver_context.AutoLoadCommandContext
-        :rtype: cloudshell.shell.core.driver_context.AutoLoadDetails
-        """
-
-        self.resources = []
-        self.attributes = []
+        self.xm = init_xena(ApiType.socket, self.logger, "quali-cs")
+        self.xm.session.add_chassis(address, port, password)
         self.xm.session.inventory()
-        self._get_chassis(self.xm.session.chassis_list[self.address])
-        details = AutoLoadDetails(self.resources, self.attributes)
-        return details
+        self._load_chassis(self.xm.session.chassis_list[address])
+        return self.resource.create_autoload_details()
 
-    def _get_chassis(self, chassis):
+    def _load_chassis(self, chassis: XenaChassis) -> None:
 
-        self.attributes.append(AutoLoadAttribute(relative_address='',
-                                                 attribute_name='CS_TrafficGeneratorChassis.Model Name',
-                                                 attribute_value=chassis.c_info['c_model']))
-        self.attributes.append(AutoLoadAttribute(relative_address='',
-                                                 attribute_name='Xena Chassis Shell 2G.Serial Number',
-                                                 attribute_value=chassis.c_info['c_serialno']))
-        self.attributes.append(AutoLoadAttribute(relative_address='',
-                                                 attribute_name='Xena Chassis Shell 2G.Server Description',
-                                                 attribute_value=''))
-        self.attributes.append(AutoLoadAttribute(relative_address='',
-                                                 attribute_name='CS_TrafficGeneratorChassis.Vendor',
-                                                 attribute_value='Xena'))
-        self.attributes.append(AutoLoadAttribute(relative_address='',
-                                                 attribute_name='CS_TrafficGeneratorChassis.Version',
-                                                 attribute_value=chassis.c_info['c_versionno']))
+        self.resource.model_name = chassis.c_info["c_model"]
+        self.resource.serial_number = chassis.c_info["c_serialno"]
+        self.resource.vendor = "Xena"
+        self.resource.version = chassis.c_info["c_versionno"]
 
         for module_id, module in chassis.modules.items():
-            self._get_module(module_id, module)
+            self._load_module(module_id, module)
 
-    def _get_module(self, module_id, module):
-        """ Get module resource and attributes. """
+    def _load_module(self, module_id: int, module: XenaModule) -> None:
+        """Get module resource and attributes."""
 
-        relative_address = 'M' + str(module_id)
-        model = 'Xena Chassis Shell 2G.GenericTrafficGeneratorModule'
-        resource = AutoLoadResource(model=model, name='Module' + str(module_id), relative_address=relative_address)
-        self.resources.append(resource)
-        self.attributes.append(AutoLoadAttribute(relative_address=relative_address,
-                                                 attribute_name='CS_TrafficGeneratorModule.Model Name',
-                                                 attribute_value=module.m_info['m_model']))
-        self.attributes.append(AutoLoadAttribute(relative_address=relative_address,
-                                                 attribute_name=model + '.Serial Number',
-                                                 attribute_value=module.m_info['m_serialno']))
-        self.attributes.append(AutoLoadAttribute(relative_address=relative_address,
-                                                 attribute_name=model + '.Version',
-                                                 attribute_value=module.m_info['m_versionno']))
+        gen_module = GenericTrafficGeneratorModule(f"Module{module_id}")
+        self.resource.add_sub_resource(f"M{module_id}", gen_module)
+        gen_module.model_name = module.m_info["m_model"]
+        gen_module.serial_number = module.m_info["m_serialno"]
+        gen_module.version = module.m_info["m_versionno"]
 
         for port_id, port in module.ports.items():
-            self._get_port(relative_address, port_id, port)
+            self._load_port(gen_module, port_id, port)
 
-    def _get_port(self, card_relative_address, port_id, port):
-        """ Get port resource and attributes. """
+    def _load_port(self, gen_module: GenericTrafficGeneratorModule, port_id: int, port: XenaPort) -> None:
+        """Get port resource and attributes."""
 
-        relative_address = card_relative_address + '/P' + str(port_id)
-        resource = AutoLoadResource(model='Xena Chassis Shell 2G.GenericTrafficGeneratorPort',
-                                    name='Port' + str(port_id),
-                                    relative_address=relative_address)
-        self.resources.append(resource)
-        self.attributes.append(AutoLoadAttribute(relative_address=relative_address,
-                                                 attribute_name='CS_TrafficGeneratorPort.Max Speed',
-                                                 attribute_value=port.p_info['p_speed']))
+        gen_port = GenericTrafficGeneratorPort(f"Port{port_id}")
+        gen_module.add_sub_resource(f"P{port_id}", gen_port)
+        gen_port.max_speed = int(port.p_info["p_speed"])

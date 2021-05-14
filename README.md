@@ -1,2 +1,3 @@
-# Xena Chassis Shell
-A Quali CloudShell shell to load Xena Chassis
+# Xena Chassis Shell 2G
+
+Under construction...

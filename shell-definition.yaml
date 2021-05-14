@@ -1,13 +1,12 @@
-description: 'Xena chassis shell
+description: Tosca based Xena Valkyrie chassis shell
 
-  '
 imports:
 - cloudshell_standard: cloudshell_traffic_generator_chassis_standard_1_0_3.yaml
 metadata:
   template_author: Quali
   template_icon: shell-icon.png
   template_name: Xena Chassis Shell 2G
-  template_version: 2.0.2
+  template_version: 3.0.0
 node_types:
   vendor.Xena Chassis Shell 2G:
     artifacts:
