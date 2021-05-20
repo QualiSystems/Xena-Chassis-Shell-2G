@@ -4,11 +4,10 @@ Tests for XenaChassisDriver.
 
 import pytest
 from _pytest.fixtures import SubRequest
-
-from cloudshell.api.cloudshell_api import CloudShellAPISession, AttributeNameValue, ResourceInfo
+from cloudshell.api.cloudshell_api import AttributeNameValue, CloudShellAPISession, ResourceInfo
 from cloudshell.shell.core.driver_context import AutoLoadCommandContext
 from cloudshell.traffic.tg import TGN_CHASSIS_FAMILY, XENA_CHASSIS_MODEL
-from shellfoundry_traffic.test_helpers import create_session_from_config, TestHelpers, print_inventory
+from shellfoundry_traffic.test_helpers import TestHelpers, create_session_from_config, print_inventory
 
 from xena_driver import XenaChassisDriver
 
@@ -25,7 +24,7 @@ def session() -> CloudShellAPISession:
 
 @pytest.fixture(scope="session")
 def test_helpers(session: CloudShellAPISession) -> TestHelpers:
-    """ Yields initialized TestHelpers object. """
+    """Yields initialized TestHelpers object."""
     yield TestHelpers(session)
 
 
