@@ -1,7 +1,7 @@
 import logging
 
 from cloudshell.shell.core.driver_context import AutoLoadCommandContext, AutoLoadDetails, InitCommandContext
-from cloudshell.shell.core.session.cloudshell_session import CloudShellSessionContext
+from cloudshell.traffic.helpers import get_cs_session
 from cloudshell.traffic.tg import TgChassisHandler
 from trafficgenerator.tgn_utils import ApiType
 from xenavalkyrie.xena_app import XenaChassis, XenaModule, XenaPort, init_xena
@@ -20,7 +20,7 @@ class XenaHandler(TgChassisHandler):
         port = self.resource.controller_tcp_port
         port = int(port) if port else 22611
         encrypted_password = self.resource.password
-        password = CloudShellSessionContext(context).get_api().DecryptPassword(encrypted_password).Value
+        password = get_cs_session(context).DecryptPassword(encrypted_password).Value
 
         self.xm = init_xena(ApiType.socket, self.logger, "quali-cs")
         self.xm.session.add_chassis(address, port, password)

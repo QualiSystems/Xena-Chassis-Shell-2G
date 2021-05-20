@@ -1,4 +1,4 @@
-<Driver Description="Xena Chassis 2G Driver" MainClass="xena_driver.XenaChassisDriver" Name="Xena Chassis 2G Driver" Version="3.0.0" PythonVersion="3">
+<Driver Description="Xena Chassis 2G Shell" MainClass="xena_driver.XenaChassisDriver" Name="Xena Chassis 2G Driver" Version="3.0.0" PythonVersion="3">
     <Layout>
         <Command Description="Import device into Cloudshell" DisplayName="Autoload" Name="get_inventory" Tags="">
         </Command>
