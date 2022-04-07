@@ -15,12 +15,14 @@ class XenaHandler(TgChassisHandler):
         super().initialize(resource, logger)
 
     def load_inventory(self, context: AutoLoadCommandContext) -> AutoLoadDetails:
-        """Return device structure with all standard attributes. """
+        """Return device structure with all standard attributes."""
         address = context.resource.address
         port = self.resource.controller_tcp_port
         port = int(port) if port else 22611
         encrypted_password = self.resource.password
+        self.logger.info(type(context))
         password = get_cs_session(context).DecryptPassword(encrypted_password).Value
+        self.logger.info("BBB")
 
         self.xm = init_xena(ApiType.socket, self.logger, "quali-cs")
         self.xm.session.add_chassis(address, port, password)
@@ -39,7 +41,7 @@ class XenaHandler(TgChassisHandler):
             self._load_module(module_id, module)
 
     def _load_module(self, module_id: int, module: XenaModule) -> None:
-        """Get module resource and attributes. """
+        """Get module resource and attributes."""
         gen_module = GenericTrafficGeneratorModule(f"Module{module_id}")
         self.resource.add_sub_resource(f"M{module_id}", gen_module)
         gen_module.model_name = module.m_info["m_model"]
@@ -50,7 +52,7 @@ class XenaHandler(TgChassisHandler):
             self._load_port(gen_module, port_id, port)
 
     def _load_port(self, gen_module: GenericTrafficGeneratorModule, port_id: int, port: XenaPort) -> None:
-        """Get port resource and attributes. """
+        """Get port resource and attributes."""
         gen_port = GenericTrafficGeneratorPort(f"Port{port_id}")
         gen_module.add_sub_resource(f"P{port_id}", gen_port)
         gen_port.max_speed = int(port.p_info["p_speed"])

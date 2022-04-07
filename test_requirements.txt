@@ -2,9 +2,10 @@
 
 pytest
 pytest-cov
-pytest-isort
-pytest-flake8
+
 pre-commit
+pylint
+pylint_pytest
 
 PyYAML
 

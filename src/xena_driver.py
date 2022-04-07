@@ -4,13 +4,13 @@ from xena_handler import XenaHandler
 
 
 class XenaChassisDriver(TrafficDriver):
-    def __init__(self):
+    def __init__(self) -> None:
         self.handler = XenaHandler()
 
-    def initialize(self, context):
+    def initialize(self, context) -> None:
         super().initialize(context)
 
-    def cleanup(self):
+    def cleanup(self) -> None:
         super().cleanup()
 
     def get_inventory(self, context):

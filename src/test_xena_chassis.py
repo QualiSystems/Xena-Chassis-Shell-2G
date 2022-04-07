@@ -1,7 +1,6 @@
 """
 Tests for XenaChassisDriver.
 """
-
 import pytest
 from _pytest.fixtures import SubRequest
 from cloudshell.api.cloudshell_api import AttributeNameValue, CloudShellAPISession, ResourceInfo
@@ -12,7 +11,7 @@ from shellfoundry_traffic.test_helpers import TestHelpers, create_session_from_c
 from xena_driver import XenaChassisDriver
 
 
-@pytest.fixture(params=[("176.22.65.117", "22611", "xena", "h8XUgX3gyjY0vKMg0wQxKg==")])
+@pytest.fixture(params=[("demo.xenanetworks.com", "22611", "xena", "h8XUgX3gyjY0vKMg0wQxKg==")])
 def dut(request: SubRequest) -> list:
     return request.param
 
@@ -58,7 +57,7 @@ def autoload_resource(session: CloudShellAPISession, test_helpers: TestHelpers, 
         AttributeNameValue(f"{XENA_CHASSIS_MODEL}.Controller TCP Port", controller_port),
         AttributeNameValue(f"{XENA_CHASSIS_MODEL}.Password", password),
     ]
-    resource = test_helpers.create_autoload_resource(XENA_CHASSIS_MODEL, "test-xena", address, attributes)
+    resource = test_helpers.create_autoload_resource(XENA_CHASSIS_MODEL, "Testing/test-xena", address, attributes)
     yield resource
     session.DeleteResource(resource.Name)
 
