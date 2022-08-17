@@ -1,4 +1,4 @@
-exclude: src/xena_data_model.py
+exclude: src/xena_data_model.py|src/test_xena_chassis.py
 repos:
   - repo: https://github.com/timothycrosley/isort
     rev: 5.10.1
