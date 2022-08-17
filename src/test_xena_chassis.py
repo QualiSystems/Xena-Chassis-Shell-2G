@@ -77,7 +77,7 @@ def test_autoload(driver: XenaChassisDriver, autoload_context: AutoLoadCommandCo
     print_inventory(inventory)
 
 
-def test_autoload_session(session: CloudShellAPISession, autoload_resource: ResourceInfo, dut: dut) -> None:
+def test_autoload_session(session: CloudShellAPISession, autoload_resource: ResourceInfo, dut: dict) -> None:
     """Test indirect (shell) auto load command."""
     session.AutoLoad(autoload_resource.Name)
     resource_details = session.GetResourceDetails(autoload_resource.Name)
