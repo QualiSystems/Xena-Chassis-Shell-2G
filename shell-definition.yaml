@@ -1,14 +1,19 @@
 description: Tosca based Xena Valkyrie chassis shell
 
+tosca_definitions_version: tosca_simple_yaml_1_0
+
 imports:
 - cloudshell_standard: cloudshell_traffic_generator_chassis_standard_1_0_3.yaml
+
 metadata:
   template_author: Quali
   template_icon: shell-icon.png
   template_name: Xena Chassis Shell 2G
-  template_version: 3.0.3
+  template_version: 3.1.0
+
 node_types:
   vendor.Xena Chassis Shell 2G:
+    derived_from: cloudshell.nodes.TrafficGeneratorChassis
     artifacts:
       driver:
         file: XenaChassisShell2GDriver.zip
@@ -24,5 +29,3 @@ node_types:
           Password:
             type: cloudshell.datatypes.Password
         type: cloudshell.capabilities.AutoDiscovery
-    derived_from: cloudshell.nodes.TrafficGeneratorChassis
-tosca_definitions_version: tosca_simple_yaml_1_0

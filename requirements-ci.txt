@@ -1,12 +1,6 @@
 -r src/requirements.txt
 
-pytest
-pytest-cov
-
+# Pipeline
 pre-commit
 pylint
 pylint_pytest
-
-PyYAML
-
-shellfoundry_traffic
